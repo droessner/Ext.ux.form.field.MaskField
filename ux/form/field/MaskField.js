@@ -102,6 +102,7 @@ Ext.define('Ext.ux.form.field.MaskField', {
 				keydown: me.processEvent,
 				keyup: me.processEvent,
 				change: me.resetIfEmpty,
+				paste: me.processPaste,
 				scope: me,
 				stopEvent: false,
 				contextmenu: {
@@ -279,7 +280,11 @@ Ext.define('Ext.ux.form.field.MaskField', {
 			if (!((code === Ext.EventObject.TAB && type === down) ||
 				(code === Ext.EventObject.ENTER && type === up) ||
 				(code === Ext.EventObject.F5 && type === down) ||
-				(event.ctrlKey && code === Ext.EventObject.C && type === down))) {
+				(event.ctrlKey && code === Ext.EventObject.C && type === down) ||
+				(event.ctrlKey && code === Ext.EventObject.V && type === down) ||
+				(event.ctrlKey && code === Ext.EventObject.A && type === down) ||
+				(event.ctrlKey && code === Ext.EventObject.LEFT && type === down) ||
+				(event.ctrlKey && code === Ext.EventObject.RIGHT && type === down))) {
 				event.preventDefault();
 
 				allowEvent = false;
@@ -563,5 +568,12 @@ Ext.define('Ext.ux.form.field.MaskField', {
 		me.setValue(newValue.join(''));
 		me.skipZeroCheck = false;
 		me.setPositionCustom(position[0]);
+	},
+
+	processPaste: function(event) {
+		var clipBoard = event.browserEvent.clipboardData.getData('Text');
+		setTimeout(function() {
+			this.setValue(clipBoard);
+		}.bind(this), 1);
 	}
 });
