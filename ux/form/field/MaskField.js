@@ -42,7 +42,7 @@ Ext.define('Ext.ux.form.field.MaskField', {
 	 * @type {Boolean}
 	 * @property allowPartial
 	 */
-	allowPartial : false,
+	allowPartial: false,
 	/**
 	 * Whether or not the value in the field can be set to "0".
 	 * This is important for phone number fields for example.
@@ -111,8 +111,8 @@ Ext.define('Ext.ux.form.field.MaskField', {
 				}
 			});
 		}, me, {
-			single: true
-		});
+				single: true
+			});
 
 		me.callParent(arguments);
 	},
@@ -142,11 +142,11 @@ Ext.define('Ext.ux.form.field.MaskField', {
 		value = me.data.join('');
 		if (value.length === 0 && !allowBlank) {
 			errors.push(me.blankText);
-        } else if (value.length < maskIndex.length && allowPartial === false && !(value.length === 0 && allowBlank)) {
+		} else if (value.length < maskIndex.length && allowPartial === false && !(value.length === 0 && allowBlank)) {
 			errors.push(me.maskIncompleteText);
-        }
+		}
 
-        return errors;
+		return errors;
 	},
 	setValue: function(value) {
 		var me = this,
@@ -220,7 +220,7 @@ Ext.define('Ext.ux.form.field.MaskField', {
 	 */
 	removeIfSelectAll: function() {
 		var me = this,
-			textField = Ext.query('INPUT[type=text]', me.el.dom)[0],
+			textField = Ext.dom.Query.select('INPUT[type=text]', me.el.dom)[0],
 			documentRange,
 			duplicateRange,
 			range,
@@ -231,9 +231,9 @@ Ext.define('Ext.ux.form.field.MaskField', {
 			isFieldReset = true;
 		} else if (document.selection) {
 			documentRange = document.selection.createRange();
-		    range = textField.createTextRange();
-		    duplicateRange = range.duplicate();
-		    range.moveToBookmark(documentRange.getBookmark());
+			range = textField.createTextRange();
+			duplicateRange = range.duplicate();
+			range.moveToBookmark(documentRange.getBookmark());
 
 			if (range.text.length === me.fieldTextArray.length) {
 				me.setValue('');
@@ -273,7 +273,7 @@ Ext.define('Ext.ux.form.field.MaskField', {
 				} else {
 					startIdx = me.maskIndex[0];
 				}
-				me.setPosition(startIdx);
+				me.setPositionCustom(startIdx);
 			}
 
 			if (!((code === Ext.EventObject.TAB && type === down) ||
@@ -299,9 +299,9 @@ Ext.define('Ext.ux.form.field.MaskField', {
 							}
 						}
 					} else if (code === Ext.EventObject.END) {
-						me.setPosition(me.getMaskPosition(me.dataIndex[me.dataIndex.length - 1], 1));
+						me.setPositionCustom(me.getMaskPosition(me.dataIndex[me.dataIndex.length - 1], 1));
 					} else if (code === Ext.EventObject.HOME) {
-						me.setPosition(me.maskIndex[0]);
+						me.setPositionCustom(me.maskIndex[0]);
 					} else if (code === Ext.EventObject.LEFT || code === Ext.EventObject.UP) {
 						me.moveMask(-1);
 					} else if (code === Ext.EventObject.RIGHT || code === Ext.EventObject.DOWN) {
@@ -314,7 +314,7 @@ Ext.define('Ext.ux.form.field.MaskField', {
 							me.insertActive = true;
 							me.highlight = false;
 						}
-						me.setPosition(me.getPosition()[0]);
+						me.setPositionCustom(me.getPosition()[0]);
 					} else if (code === Ext.EventObject.DELETE) {
 						if (!me.removeIfSelectAll()) {
 							if (me.insertActive) {
@@ -351,7 +351,7 @@ Ext.define('Ext.ux.form.field.MaskField', {
 		var me = this,
 			index = me.getMaskPosition(me.getPosition()[0], 0);
 
-		me.setPosition(index);
+		me.setPositionCustom(index);
 	},
 	/**
 	 * @private
@@ -373,7 +373,7 @@ Ext.define('Ext.ux.form.field.MaskField', {
 		} else if (direction === 0) {
 			for (i = 0; i < length; i++) {
 				if (me.maskIndex[i] >= cursorPosition) {
-					position =  me.maskIndex[i];
+					position = me.maskIndex[i];
 					break;
 				} else {
 					position = me.maskIndex[length];
@@ -402,7 +402,7 @@ Ext.define('Ext.ux.form.field.MaskField', {
 		var me = this,
 			index = me.getMaskPosition(me.getPosition()[0], value);
 
-		me.setPosition(index);
+		me.setPositionCustom(index);
 	},
 	/**
 	 * @private
@@ -416,29 +416,30 @@ Ext.define('Ext.ux.form.field.MaskField', {
 			duplicateRange,
 			ieStart,
 			ieEnd,
-			textField = Ext.query('INPUT[type=text]', me.el.dom)[0];
+			textField = Ext.dom.Query.select('INPUT[type=text]', me.el.dom)[0];
 
 		if (Ext.isDefined(textField.selectionStart) && Ext.isDefined(textField.selectionEnd)) {
 			positionArray = [textField.selectionStart, textField.selectionEnd];
 		} else if (document.selection) {
 			documentRange = document.selection.createRange();
-		    range = textField.createTextRange();
-		    duplicateRange = range.duplicate();
-		    range.moveToBookmark(documentRange.getBookmark());
-		    duplicateRange.setEndPoint('EndToStart', range);
+			range = textField.createTextRange();
+			duplicateRange = range.duplicate();
+			range.moveToBookmark(documentRange.getBookmark());
+			duplicateRange.setEndPoint('EndToStart', range);
 
 			ieStart = duplicateRange.text.length;
 			ieEnd = ieStart + (me.insertActive ? 0 : 1);
 
-		    positionArray = [ieStart, ieEnd];
+			positionArray = [ieStart, ieEnd];
 		}
 		return positionArray || [0, 0];
 	},
 	/**
 	 * @private
 	 * Sets the curosr position in the input field.
+	 * Usage of setPosition will override the default setPosition behavior
 	 */
-	setPosition: function(start) {
+	setPositionCustom: function(start) {
 		this.selectText(start, start + (this.highlight ? 1 : 0));
 	},
 	/**
@@ -561,6 +562,6 @@ Ext.define('Ext.ux.form.field.MaskField', {
 		me.skipZeroCheck = true;
 		me.setValue(newValue.join(''));
 		me.skipZeroCheck = false;
-		me.setPosition(position[0]);
+		me.setPositionCustom(position[0]);
 	}
 });
